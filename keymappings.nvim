@@ -1,0 +1,293 @@
+" Basic key remapping {{{
+inoremap kj <Esc>
+vnoremap kj <esc>
+inoremap jk <esc>
+vnoremap jk <esc>
+
+" The leader key
+let mapleader=" "
+let maplocalleader=","
+
+" Disable backspace in insert mode to make sure to use vim movements
+inoremap <backspace> <nop>
+
+"}}}
+
+" Vimwiki {{{
+" Mnemonic x is usually used to mark a *task* done
+nnoremap <Localleader>x :edit ~/Documents/wiki/Tasks.wiki<CR>
+nnoremap <Localleader>s :edit ~/Documents/wiki/ScratchPad.wiki<CR>
+nnoremap \w :edit ~/Documents/wiki/Writing Ideas.wiki<CR>
+" The current endeavours
+nnoremap \a :edit ~/Documents/wiki/Build a custom Bike.wiki<Cr>
+nnoremap \s :edit ~/Documents/wiki/Learn Architecture.wiki<Cr>
+" }}}
+
+" Deoplete {{{
+" Use tab as the selection key in deoplete
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" }}}
+
+" fzf mappings {{{
+" Remap the fzf command
+nnoremap <leader>f :Files<Cr>
+nnoremap <leader>b :Buffers<Cr>
+nnoremap <leader>t :BTags<Cr>
+nnoremap <leader>T :Tags<Cr>
+nnoremap <leader>r :Rg<Cr>
+nnoremap <leader>v :Lines<Cr>
+nnoremap <leader>m :Marks<Cr>
+" Open a full screen window
+nnoremap <leader>R :Rg!<Cr>
+" Open search history
+nnoremap <leader>/ :History/<Cr>
+" Open command history
+nnoremap <leader>h :History:<Cr>
+
+" Search for the word under the cursor in the project
+let command = "rg --column --line-number --no-heading --color=always --smart-case " .shellescape(expand('<cword>'))
+nnoremap <silent> <leader>* :call fzf#vim#grep(
+            \command, 
+            \1,
+            \fzf#vim#with_preview())<CR>
+" }}}
+
+" ALE mappings {{{
+" nnoremap <silent> <leader>n :ALENext<cr>
+" nnoremap <silent> <leader>p :ALEPrevious<cr>
+" }}}
+
+" vim-sexp mappings {{{
+augroup sexp_mappings
+    autocmd!
+    execute 'autocmd FileType' get(g:, 'sexp_filetypes', 'lisp,scheme,clojure') 'call sexpMappings#CreateMappings()'
+augroup END
+" }}}
+
+" vim-fireplace {{{
+nnoremap <leader>l :Last<cr>
+augroup fireplace_mappings
+    autocmd!
+    autocmd BufWritePost *.clj call fireplaceHelpers#Reload()
+    "autocmd BufReadCmd *.clj call fireplaceHelpers#CreateMappings()
+augroup END
+" }}}
+
+" Vimdiff mappings {{{
+" Always open diffs in vertical splits
+set diffopt+=vertical
+
+if &diff
+    set norelativenumber
+    set nonumber
+endif
+" }}}
+
+" Window mappings {{{
+nnoremap + +
+nnoremap _ -
+nnoremap  k
+nnoremap  l
+nnoremap  h
+nnoremap <C-j> j
+nnoremap gv :vertical wincmd f<CR>
+" Use alt-] to open the tag under cursor in a vertical split
+noremap <a-]> :vsp <cr>:execute("tag ".expand("<cword>"))<cr>
+" Open alternate buffer in a vertical split
+noremap <leader><C-^> :<c-u>execute "rightbelow vsplit ".bufname("#")<cr>
+" }}}
+
+" Buffer mappings {{{
+" Write a buffer
+noremap <leader>w :w<cr>
+" Write all buffers
+noremap <leader>wa :wa<cr>
+" Quit
+noremap <leader>q :q<cr>
+" Close current window
+noremap <leader>x :close<cr>
+" Close the buffer and keep only one view open
+noremap <leader>d :bdelete<cr>
+noremap [b :bprevious<cr>
+noremap ]b :bnext<cr>
+" }}}
+
+" Arglist mappings {{{
+nnoremap [a :previous<CR>
+nnoremap ]a :next<CR>
+nnoremap [A :first<CR>
+nnoremap ]A :last<CR>
+" }}}
+
+" Quickfix list mappings {{{
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap [Q :cfirst<CR>
+nnoremap ]Q :clast<CR>
+" }}}
+
+" Folding mappings {{{
+noremap <leader>zs :set foldmethod=syntax<cr>
+noremap <leader>zi :set foldmethod=indent<cr>
+noremap <leader>[ zm
+noremap <leader>] zr
+noremap <leader>{ zM
+noremap <leader>} zR
+" }}}
+
+" {{{ Spacing mappings
+" Insert an empty line below the cursor
+nnoremap <leader>o myo<esc>"_D`y
+
+" Insert an empty line above the cursor
+nnoremap <leader>O myO<esc>"_D`y
+" }}}
+
+" Transposing lines {{{
+nnoremap <a-j> :m .+1<cr>
+nnoremap <a-k> :m .-2<cr>
+inoremap <a-j> <esc>:m .+1<cr>==gi
+inoremap <a-k> <esc>:m .-2<cr>==gi
+vnoremap <a-j> :m '>+1<cr>gv=gv
+vnoremap <a-k> :m '<-2<cr>gv=gv
+" }}}
+
+" Indentation {{{
+" Disabling this as remaping tab remaps Ctrl-I as well.
+" See this for more details: https://stackoverflow.com/questions/14641942/how-to-unmap-tab-and-do-not-make-ctrl-i-invalid-in-vim
+" nnoremap <Tab> >>
+" nnoremap <S-Tab> <<
+" inoremap <S-Tab> <C-D>
+" vnoremap <Tab> >gv
+" vnoremap <S-Tab> <gv
+" }}}
+
+" Config file helpers {{{
+" Open config file for editing
+noremap <leader>ev :e $MYVIMRC<cr>
+" Open the autoload directory
+noremap <leader>ea :e $HOME/.config/nvim/autoload<cr>
+" Open the `after` directory
+noremap <leader>ef :e $HOME/.config/nvim/after<cr>
+
+" Reload config vim
+noremap <leader>sv :source $MYVIMRC<cr>
+" }}}
+
+" Surround text {{{
+" Surround visually selected text
+vnoremap <leader>" :<cr>`><esc>a"<esc>`<i"<esc>`>l
+vnoremap <leader>' :<cr>`><esc>a'<esc>`<i'<esc>`>l
+vnoremap <leader>< :<cr>`><esc>a><esc>`<i<<esc>`>l
+vnoremap <leader>> :<cr>`><esc>a><esc>`<i<<esc>`>l
+vnoremap <leader>` :<cr>`><esc>a`<esc>`<i`<esc>`>l
+vnoremap <leader>{ :<cr>`><esc>a{<esc>`<i`<esc>`}l
+" }}}
+
+" Defining new 'movements' {{{
+" Work on text inside parentheses. Useful for function
+" parameters
+onoremap p i(
+" Works when cursor is before the parameters
+onoremap n( :<c-u>normal! f(vi(<cr>
+" Works when cursor is after the parameters
+onoremap l( :<c-u>normal! F)vi(<cr>
+
+" When cursor is before the braces
+onoremap n{ :<c-u>normal! f{vi{<cr>
+" When cursor is after the braces
+onoremap l{ :<c-u>normal! F}vi{<cr>
+" }}}
+
+" {{{ External shell mappings
+" Command structure <char representing external command><abbr-command-string><command-option>
+nnoremap !td :!tree -d<cr>
+nnoremap !t :!tree<cr>
+" }}}
+
+" Fugitive {{{
+noremap <localleader>dv :Gvdiffsplit!<cr>
+noremap <localleader>g :G<cr>
+noremap <localleader>gh :diffget //2<cr>
+noremap <localleader>gl :diffget //3<cr>
+" }}}
+
+" Capitalize shit --------------- {{{
+if (&tildeop)
+    " Mnemonic go capitalize object
+    " gciw       - capitalize inner word (from start to end)
+    " gciW       - capitalize inner WORD (from start to end)
+    " gcis       - capitalize inner sentence
+    " gcgc       - capitalize whole line (from start to end)
+    " gcc        - capitalize character
+    " {Visual}gc - capitalize highlighted text
+    noremap gciw guiw~l
+    noremap gciW guiW~l
+    noremap gcis guis~l
+    noremap gcgc guu~l
+    noremap gcc g~l
+    vnoremap gc gu~l
+else
+    noremap gciw guiw~h
+    noremap gciW guiW~h
+    noremap gcis guis~h
+    noremap gcgc guu~h
+    noremap gcc g~h
+    vnoremap gc gu~h
+endif
+inoremap <c-]> <Esc>bg~lea
+
+" Title Case a Line
+nnoremap <leader>gt :s/\v<(.)(\w*)/\u\1\L\2/g<cr>:noh<cr>
+" }}}
+
+" Miscellaneous {{{
+" Make searches very magical
+noremap / /\v
+noremap ? ?\v
+
+" When jumping to a tag, open up all the options if multiple tags exist
+noremap <c-]> g<c-]>
+" Clear search highlighting
+nnoremap <leader>c :noh<cr>
+
+" Open file explorer vertically
+nnoremap - :Vex<cr>
+
+" Bring a line to the top of the window
+nnoremap <leader>i jz<Cr>
+" Bring a line to the bottom of the window
+nnoremap <leader>I jkzb
+
+" Make the word under the cursor upper case
+inoremap <C-U> <ESC>bgUwea
+
+
+" Create a mark `m` when starting indent
+nnoremap = mm=
+
+" Make 0 move to the first non empty character in a line
+noremap 0 ^
+
+" Stamping - Replace the current word with the last yanked text
+" Note that it replaces the vim S command
+noremap S diw"0P
+
+" Move to the heading of current section.
+" onoremap iH :<c-u>execute "normal! ?^==\\+$\r:nohlsearch\rkvg_"<cr>
+
+" Same functionality as above but works for github flavored markdown.
+onoremap ih :<c-u>execute "normal! ?^#\\{1,6} \r:nohlsearch\rf lvg_"<cr>
+
+" Move to the next trailing whitespace
+noremap z<space> :/\v\s+%#@<!$/<CR>
+" }}}
+
+" Eye candy {{{
+" Create two schemes for light and dark.
+nnoremap <f1> :colorscheme summerFruit256<cr>
+nnoremap <f2> :colorscheme myCarbonizedDark<cr>
+nnoremap <f3> :colorscheme carbonized-light<cr>
+" }}}
+

@@ -1,0 +1,200 @@
+" Commands
+" Insert Comment
+" :command! Cm s/^/\/\/
+
+" Remove Comment
+" :command! Rcm s/^\/\//
+
+:command! Bumba Connect nrepl://bumba:38210
+:command! BumbaIn Connect nrepl://13.233.144.111:36521
+
+:command! CopyIp execute "!copy-my-ip"
+
+:command! -nargs=+ WhitelistIp execute "!whitelist-my-ip" '<args>'
+
+" Use python to format json
+:command! FormatJson execute "%!python -m json.tool"
+
+" Thesaurus FIXME: WIP --- {{{
+function! ReplaceWord(word)
+    echom "what is happening right now"
+endfunction
+
+function! Thesaurus()
+    let wordUnderCursor = expand("<cword>")
+    let cmd = "thesaurus " . wordUnderCursor
+    let words = systemlist(cmd)
+    call fzf#run(fzf#wrap({'source': words,
+                \ 'sink': function('ReplaceWord'),
+                \ 'window': {'width': 0.9, 'height': 0.9},
+                \ 'options': "--preview=\"wn {} -simsv | fold -w 45 -s\""
+                \}))
+endfunction
+" inoremap <expr> <c-'> Thesaurus()
+nnoremap \t :call Thesaurus()<cr>
+" --- }}}
+
+" Dictionary --- {{{
+function! Dict()
+    let wordUnderCursor = expand("<cword>")
+    " wn wordUnderCursor -over
+    call fzf#run(fzf#wrap({'source': [wordUnderCursor],
+                \ 'sink': 'e',
+                \ 'window': {'width': 0.9, 'height': 0.9},
+                \ 'options': "--preview=\"wn {} -over | fold -w 40 -s\""}))
+endfunction
+nnoremap \d :call Dict()<cr>
+" --- }}}
+
+" HighlightTrailingSpaces {{{
+noremap z. :call HighlightTrailingSpaces()<CR>
+function! HighlightTrailingSpaces()
+	let w:highlight_spaces = exists('w:highlight_spaces') ? !w:highlight_spaces : 1
+	if (w:highlight_spaces)
+		echo 'Highlight trailing spaces: on'
+		execute "match Error " . '/\v\s+%#@<!$/'
+	else
+		echo 'Highlight trailing spaces: off'
+		match none
+	endif
+endfunction
+" }}}
+
+" AutoHighlightToggle {{{
+nnoremap z/ :if AutoHighlightToggle()<Bar>set hls<Bar>endif<CR>
+function! AutoHighlightToggle()
+	let @/ = ''
+	if exists('#auto_highlight')
+		au! auto_highlight
+		augroup! auto_highlight
+		setl updatetime=4000
+		echo 'Highlight current word: off'
+		return 0
+	else
+		augroup auto_highlight
+			au!
+			au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
+		augroup end
+		setl updatetime=500
+		echo 'Highlight current word: ON'
+		return 1
+	endif
+endfunction
+" }}}
+
+" CheckFileType {{{
+" An example vim function to detect the file type
+function! CheckFileType()
+	if exists("b:countCheck") == 0
+		let b:countCheck = 0
+	endif
+	let b:countCheck += 1
+	" Don't start detecting until approx. 20 chars.
+	if &filetype == '' && b:countCheck > 20 && b:countCheck < 200
+		filetype detect
+	elseif b:countCheck >= 200 || &filetype != ""
+		autocmd! newFileDetection
+	endif
+endfunction
+" }}}
+
+" SetTimeOfDayColors {{{
+" An example vim function to change the color scheme
+" based on the type of the day
+function! SetTimeOfDayColors()
+	" progressively check higher values... falls
+	" out on first "true"
+	" (note addition of zero... this guarantees
+	" return from function is numeric)
+	let currentHour = strftime("%H")
+	echo "currentHour is " . currentHour
+	if currentHour < 6 + 0
+		let colorScheme = "darkblue"
+	elseif currentHour < 12 + 0
+		let colorScheme = "morning"
+	elseif currentHour < 18 + 0
+		let colorScheme = "shine"
+	else
+		let colorScheme = "evening"
+	endif
+	echo "setting color scheme to " . colorScheme
+	execute "colorscheme " . colorScheme
+endfunction
+" }}}
+
+" HighlightTrailingSpaces {{{
+noremap z. :call HighlightTrailingSpaces()<CR>
+function! HighlightTrailingSpaces()
+	let w:highlight_spaces = exists('w:highlight_spaces') ? !w:highlight_spaces : 1
+	if (w:highlight_spaces)
+		echo 'Highlight trailing spaces: on'
+		execute "match Error " . '/\v\s+%#@<!$/'
+	else
+		echo 'Highlight trailing spaces: off'
+		match none
+	endif
+endfunction
+" }}}
+
+" AutoHighlightToggle {{{
+nnoremap z/ :if AutoHighlightToggle()<Bar>set hls<Bar>endif<CR>
+function! AutoHighlightToggle()
+	let @/ = ''
+	if exists('#auto_highlight')
+		au! auto_highlight
+		augroup! auto_highlight
+		setl updatetime=4000
+		echo 'Highlight current word: off'
+		return 0
+	else
+		augroup auto_highlight
+			au!
+			au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
+		augroup end
+		setl updatetime=500
+		echo 'Highlight current word: ON'
+		return 1
+	endif
+endfunction
+" }}}
+
+" CheckFileType {{{
+" An example vim function to detect the file type
+function! CheckFileType()
+	if exists("b:countCheck") == 0
+		let b:countCheck = 0
+	endif
+	let b:countCheck += 1
+	" Don't start detecting until approx. 20 chars.
+	if &filetype == '' && b:countCheck > 20 && b:countCheck < 200
+		filetype detect
+	elseif b:countCheck >= 200 || &filetype != ""
+		autocmd! newFileDetection
+	endif
+endfunction
+" }}}
+
+" SetTimeOfDayColors {{{
+" An example vim function to change the color scheme
+" based on the type of the day
+function! SetTimeOfDayColors()
+	" progressively check higher values... falls
+	" out on first "true"
+	" (note addition of zero... this guarantees
+	" return from function is numeric)
+	let currentHour = strftime("%H")
+	echo "currentHour is " . currentHour
+	if currentHour < 6 + 0
+		let colorScheme = "darkblue"
+	elseif currentHour < 12 + 0
+		let colorScheme = "morning"
+	elseif currentHour < 18 + 0
+		let colorScheme = "shine"
+	else
+		let colorScheme = "evening"
+	endif
+	echo "setting color scheme to " . colorScheme
+	execute "colorscheme " . colorScheme
+endfunction
+" }}}
+
