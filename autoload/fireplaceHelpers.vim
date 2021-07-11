@@ -6,4 +6,3 @@ function! fireplaceHelpers#Reload()
 
     :Require
 endfunction
-

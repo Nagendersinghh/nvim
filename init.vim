@@ -5,11 +5,12 @@ if &compatible
 endif
 
 " Plugin settings ---------- {{{
-" Add the dein installation directory into runtimepath
-" Remove dein
 call plug#begin()
+
 Plug 'junegunn/fzf', { 'do': './install --all' }
 Plug 'junegunn/fzf.vim', { 'depends': 'fzf' }
+
+Plug 'hrsh7th/nvim-compe'
 
 " Tags autoupdate
 Plug 'ludovicchabant/vim-gutentags'
@@ -19,6 +20,8 @@ Plug 'tpope/vim-fugitive'
 
 " LSP
 Plug 'neovim/nvim-lspconfig'
+
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " Update the parsers on update
 
 " js highlighting
 " Try vim-jsx-improve for some time to see if it works properly
@@ -32,6 +35,9 @@ Plug 'rust-lang/rust.vim'
 Plug 'tpope/vim-repeat'
 Plug 'guns/vim-sexp'
 " Clojure plugins
+" TODO: Try conjure
+" vim-iced (Seems heavy)
+" vim-acid (Needs python)
 Plug 'tpope/vim-fireplace'
 Plug 'tpope/vim-salve'
 " call dein#add('venantius/vim-cljfmt')
@@ -43,6 +49,7 @@ Plug 'vimwiki/vimwiki'
 " Plug 'vim-airline/vim-airline'
 " Plug 'vim-airline/vim-airline-themes'
 
+Plug 'arcticicestudio/nord-vim'
 Plug 'sonph/onehalf', { 'rtp': 'vim/' }
 Plug 'nightsense/rusticated'
 Plug 'nightsense/snow'
@@ -53,84 +60,17 @@ Plug 'UndeadLeech/vim-undead'
 Plug 'vim-scripts/fountain.vim'
 Plug 'vim-scripts/DrawIt'
 Plug 'morhetz/gruvbox'
+Plug 'monsonjeremy/onedark.nvim'
+
+" Plugins in development
+" Plug '~/Documents/vimPlugins/whid'
 
 call plug#end()
 
-" set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
-" if dein#load_state('~/.cache/dein')
-"   call dein#begin('~/.cache/dein')
-" 
-"   call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
-"   " TODO: Remove deoplete to something that's currently in development
-"   call dein#add('Shougo/deoplete.nvim')
-"   if !has('nvim')
-"     call dein#add('roxma/nvim-yarp')
-"     call dein#add('roxma/vim-hug-neovim-rpc')
-"   endif
-"   call dein#add('junegunn/fzf', { 'build': './install --all', 'merged': 0 })
-"   call dein#add('junegunn/fzf.vim', { 'depends': 'fzf' })
-" 
-"   " Tags autoupdate
-"   call dein#add('ludovicchabant/vim-gutentags')
-" 
-"   " Linting
-"   " TODO: See if this is needed now that lsp support has landed
-"   " call dein#add('dense-analysis/ale')
-"   " git
-"   call dein#add('tpope/vim-fugitive')
-" 
-"   " LSP Client
-"   " call dein#add('autozimu/LanguageClient-neovim', {
-"   "   \ 'rev': 'next',
-"   "   \ 'build': 'bash install.sh',
-"   "   \ })
-"   " LSP
-"   call dein#add('neovim/nvim-lspconfig')
-" 
-"   " js highlighting
-"   " Try vim-jsx-improve for some time to see if it works properly
-"   call dein#add('pangloss/vim-javascript')
-"   call dein#add('maxmellon/vim-jsx-pretty')
-"   call dein#add('dag/vim-fish')
-" 
-"   " Rust
-"   call dein#add('rust-lang/rust.vim')
-" 
-"   call dein#add('tpope/vim-repeat')
-"   call dein#add('guns/vim-sexp')
-"   " Clojure plugins
-"   call dein#add('tpope/vim-fireplace')
-"   call dein#add('tpope/vim-salve')
-"   " call dein#add('venantius/vim-cljfmt')
-" 
-"   " VimWiki
-"   call dein#add('vimwiki/vimwiki')
-" 
-"   " Eye candy
-"   " call dein#add('vim-airline/vim-airline')
-"   " call dein#add('vim-airline/vim-airline-themes')
-" 
-"   call dein#add('sonph/onehalf', { 'rtp': 'vim/' })
-"   call dein#add('nightsense/rusticated')
-"   call dein#add('nightsense/snow')
-"   call dein#add('nightsense/carbonized')
-" 
-"   call dein#add('UndeadLeech/vim-undead')
-" 
-"   call dein#add('vim-scripts/fountain.vim')
-"   call dein#add('vim-scripts/DrawIt')
-"   call dein#add('morhetz/gruvbox')
-"   call dein#end()
-"   call dein#save_state()
-" endif
+" }}}
 
 filetype plugin indent on
 syntax enable
-
-" if dein#check_install()
-"   call dein#install()
-" endif
-" }}}
 
 " Source custom functions & commands
 source ~/.config/nvim/customCommands.nvim
@@ -177,17 +117,6 @@ let g:fugitive_force_bang_command = 1
 
 " Cljfmt configuration ------------ {{{
 " let g:clj_fmt_autosave = 0
-" }}}
-
-" LanguageClient-neovim configuration --------------- {{{
-" let g:LanguageClient_serverCommands = {
-"     \ 'rust': ['rustup', 'run', 'stable', 'rls']
-"     \}
-
-" Don't open preview window when autocompleting
-" set completeopt-=preview
-" How much time to wait after `textDocument_didChange` is sent.
-" let g:LanguageClient_changeThrottle = 0.5
 " }}}
 
 " Basic Settings --------------- {{{
@@ -255,14 +184,82 @@ set inccommand=nosplit
             \ semper dignissim.
 " }}}
 
+" Compe setup (Autocomplete) ---------- {{{
+lua << EOF
+require'compe'.setup {
+  enabled = true;
+  autocomplete = true;
+  debug = false;
+  min_length = 1;
+  preselect = 'enable';
+  throttle_time = 80;
+  source_timeout = 200;
+  incomplete_delay = 400;
+  max_abbr_width = 100;
+  max_kind_width = 100;
+  max_menu_width = 100;
+  documentation = true;
+
+  source = {
+    path = true;
+    buffer = true;
+    nvim_lsp = true;
+  };
+}
+
+local t = function(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
+local check_back_space = function()
+    local col = vim.fn.col('.') - 1
+    if col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
+        return true
+    else
+        return false
+    end
+end
+
+-- Use (s-)tab to:
+--- move to prev/next item in completion menuone
+--- jump to prev/next snippet's placeholder
+_G.tab_complete = function()
+  if vim.fn.pumvisible() == 1 then
+    return t "<C-n>"
+  elseif check_back_space() then
+    return t "<Tab>"
+  else
+    return vim.fn['compe#complete']()
+  end
+end
+_G.s_tab_complete = function()
+  if vim.fn.pumvisible() == 1 then
+    return t "<C-p>"
+  else
+    return t "<S-Tab>"
+  end
+end
+
+vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
+vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
+vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+EOF
+" }}}
+
 " Keymappings
 source ~/.config/nvim/keymappings.nvim
 
-" LSP config
-source ~/.config/nvim/lsp.nvim
+set runtimepath-=~/.config/nvim/lua
+set runtimepath+=~/.config/nvim/lua
+lua require("lsp_config")
+lua require("treesitter_config")
 
 " Source custom plugins
 source ~/Documents/vimPlugins/fzf-grep.vim
+
+" Lua plugin
+source ~/Documents/vimPlugins/whid/whid.vim
 
 " Statusline configuration ---------- {{{
 " TODO: Use lua to create a plugin that configures the statusline
@@ -282,9 +279,13 @@ set termguicolors
 " colorscheme snow
 " colorscheme carbonized-light
 " colorscheme carbonized-dark
-colorscheme myCarbonizedDark
+" colorscheme myCarbonizedDark
 " colorscheme onehalfdark
 " colorscheme onehalflight
 " colorscheme gruvbox
+" Vim Script
+colorscheme onedark
+" colorscheme nord
+
 " }}}
 

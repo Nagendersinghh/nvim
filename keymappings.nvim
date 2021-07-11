@@ -3,6 +3,7 @@ inoremap kj <Esc>
 vnoremap kj <esc>
 inoremap jk <esc>
 vnoremap jk <esc>
+inoremap KJ <esc>
 
 " The leader key
 let mapleader=" "
@@ -46,9 +47,9 @@ nnoremap <leader>/ :History/<Cr>
 nnoremap <leader>h :History:<Cr>
 
 " Search for the word under the cursor in the project
-let command = "rg --column --line-number --no-heading --color=always --smart-case " .shellescape(expand('<cword>'))
+let command = "rg --column --line-number --no-heading --color=always --smart-case "
 nnoremap <silent> <leader>* :call fzf#vim#grep(
-            \command, 
+            \command.shellescape(expand('<cword>')), 
             \1,
             \fzf#vim#with_preview())<CR>
 " }}}
